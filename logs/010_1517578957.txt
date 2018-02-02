@@ -1,0 +1,20 @@
+********************* Automatic Log File Generator *******************
+
+////////////////////////// Simulation Parameters //////////////////////////
+
+Simulation timestamp: 1517578957
+Simulation TRandom3 seed: 22
+Number of readed SBI files: 3
+Number of generated events per sky portion: 1000
+
+*
+*
+*
+
+SBI data has been loaded
+
+[ 0 % ]
+
+
+Simulation completed !!
+
