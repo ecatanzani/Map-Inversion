@@ -68,3 +68,4 @@ extern void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc);
 extern void invert_map(Double_t &costheta,Double_t &phi,Double_t l,Double_t b,Float_t sat_ra[],Float_t sat_dec[],Double_t &inv_ra,Double_t &inv_dec,Double_t inv_vector[]);
 extern void from_galactic_to_celestial(Double_t &ra,Double_t &dec,Double_t l,Double_t b);
 extern void from_celestial_to_local(AtPolarVect vector_out,Double_t vector_in[]);
+extern void obtain_costheta_phi(Double_t &costheta,Double_t &phi,Float_t sat_ra[],Float_t sat_dec[],Double_t vector_in[]);

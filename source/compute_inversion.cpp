@@ -84,6 +84,11 @@ void invert_map(Double_t &costheta,Double_t &phi,Double_t l,Double_t b,Float_t s
   
   for(Int_t idx=0; idx<3; idx++)
     inv_vector[idx]=vector_in[idx];
+
+  ///// Now obtain costheta and phi of the icnoming CR to the satellite
+
+  obtain_costheta_phi(costheta,phi,sat_ra,sat_dec,vector_in);
+
 }
 
 
@@ -151,4 +156,53 @@ void from_celestial_to_local(AtPolarVect vector_out,Double_t vector_in[]) {
     vector_in[2]=vector_out.r*sin(vector_out.lat);
   }
 
+}
+
+void obtain_costheta_phi(Double_t &costheta,Double_t &phi,Float_t sat_ra[],Float_t sat_dec[],Double_t vector_in[]) {
+  Float_t ux1[3];
+  Float_t uy1[3];
+  Float_t uz1[3];
+  Float_t rax = sat_ra[0];
+  Float_t ray = sat_ra[1];
+  Float_t raz = sat_ra[2];
+  Float_t decx = sat_dec[0];
+  Float_t decy = sat_dec[1];
+  Float_t decz = sat_dec[2];
+
+  Double_t tmp_local[3],sinphi,cosphi;
+  
+  ux1[0] = cos(decx)*cos(rax);
+  ux1[1] = cos(decx)*sin(rax);
+  ux1[2] = sin(decx);
+
+  uy1[0] = cos(decy)*cos(ray);
+  uy1[1] = cos(decy)*sin(ray);
+  uy1[2] = sin(decy);
+
+  uz1[0] = cos(decz)*cos(raz);
+  uz1[1] = cos(decz)*sin(raz);
+  uz1[2] = sin(decz);
+  
+  tmp_local[2]=((ux1[0]*vector_in[1]-ux1[1]*vector_in[0])*(ux1[2]*uy1[0]-ux1[0]*uy1[2])+(ux1[0]*vector_in[2]-ux1[2]*vector_in[0])*(ux1[0]*uy1[1]-ux1[1]*uy1[0]))/((ux1[0]*uz1[2]-ux1[2]*uz1[0])*(ux1[0]*uy1[1]-ux1[1]*uy1[0])-(ux1[1]*uz1[0]-ux1[0]*uz1[1])*(ux1[2]*uy1[0]-ux1[0]*uy1[2]));
+
+  tmp_local[1]=(tmp_local[2]*(ux1[1]*uz1[0]-ux1[0]*uz1[1])+ux1[0]*vector_in[1]-ux1[1]*vector_in[0])/((ux1[0]*uy1[1])-(ux1[1]*uy1[0]));
+
+  tmp_local[0]=(1/ux1[0])*(vector_in[0]-tmp_local[1]*uy1[0]-tmp_local[2]*uz1[0]);
+
+  costheta=tmp_local[2];
+  sinphi=tmp_local[1]/sin(acos(costheta));
+  cosphi=tmp_local[0]/sin(acos(costheta));
+
+  if(sinphi>=0 && cosphi>=0)
+    phi=acos(cosphi);
+  else if(sinphi>0 && cosphi<0)
+    phi=acos(cosphi);
+  else if(sinphi<0 && cosphi<0) {
+    phi=acos(cosphi);
+    phi+=2*(TMath::Pi()-phi);
+  }
+  else {
+    phi=acos(cosphi);
+    phi=2*TMath::Pi()-phi;
+  }
 }
