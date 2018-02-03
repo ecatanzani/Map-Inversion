@@ -51,7 +51,7 @@ void from_satellite_to_celestial(Float_t ra[],Float_t dec[],double vectorin[],At
     tmp_vector_out[idx] = vectorin[0] * ux1[idx] + vectorin[1] * uy1[idx] + vectorin[2] * uz1[idx];
     right_vector[idx]=tmp_vector_out[idx];
   }
-
+  
   AtVect_To_AtPolarVect(tmp_vector_out,vector_out);
 
 }
