@@ -7,13 +7,16 @@ static Double_t acot(Double_t value) { return atan(1/value); }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc) {
+void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D* direct,TH2D* inverse) {
   Double_t costheta=-999,phi=-999;
   Double_t b=0,l=0;
 
   /////////// Variables for inverse map checkin
-  static Double_t right_ra,right_dec,inv_ra,inv_dec;
-  static Double_t right_vector[3],inv_vector[3];
+  
+  Double_t right_ra,right_dec,inv_ra,inv_dec;
+  Double_t right_vector[3],inv_vector[3];
+  Double_t right_costheta,right_phi;
+  
   //////////////////////////////////////////////
   
   for(Int_t idx_t=0; idx_t<sky_events; idx_t++) {
@@ -24,6 +27,10 @@ void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc) {
     inv_dec=-999;
     
     acc->GetRandom2(costheta,phi);
+
+    right_costheta=costheta;
+    right_phi=phi;
+
     from_local_to_galactic(costheta,phi,l,b,sat_ra,sat_dec,right_ra,right_dec,right_vector);  //Ok, now I have the coordinates into the galactic frame. I try to go back returning to the local frame.
 
     //////////// Control for "nan" longitude values values
@@ -32,29 +39,35 @@ void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc) {
       continue;
     }
 
+    direct->Fill(costheta,phi);
+    
     invert_map(costheta,phi,l,b,sat_ra,sat_dec,inv_ra,inv_dec,inv_vector);
 
-    /*
+    inverse->Fill(costheta,phi);
     
-      I excluded the inversion check because there are little discrepancies (maybe at the 5th decimal number) in the inverted variables (different calculations are performed).
-      Checking the results they seems to be ok. Maybe we can directly check the final maps !!!
-
-
     ////////////////// Check tor correct map inversion
-    
-    if(right_ra!=inv_ra)
-      cout<<"\nProblem inverting the map !! Right ra: "<<right_ra<<" Inverted ra: "<<inv_ra<<endl;
-    if(right_dec!=inv_dec)
-      cout<<"\nProblem inverting the map !! Right dec: "<<right_dec<<" Inverted dec: "<<inv_dec<<endl;
-    
+
+    /*
+    if(fabs(right_ra-inv_ra)>err_inv)
+      cout<<"\nError inverting the map !! Right ra: "<<right_ra<<" Inverted ra: "<<inv_ra<<"\t-> Diff: "<<right_ra-inv_ra<<endl;
+    if(fabs(right_dec-inv_dec)>err_inv)
+      cout<<"\nError inverting the map !! Right dec: "<<right_dec<<" Inverted dec: "<<inv_dec<<endl;
+
     for(Int_t idx=0; idx<3; idx++)
-      if(right_vector[idx]!=inv_vector[idx]) {
+      if(fabs(right_vector[idx]-inv_vector[idx])>err_inv) {
 	  cout<<"\n\nError inverting the map !"<<endl;
 	  cout<<"Right "<<idx<<" component: "<<right_vector[idx]<<" inv "<<idx<<" component: "<<inv_vector[idx];
       }
+  
     
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    if(fabs(right_costheta-costheta)>err_inv)
+      cout<<"\nError inverting the map: right costheta: "<<right_costheta<<" inv costheta: "<<costheta;
+    if(fabs(right_phi-phi)>err_inv)
+      cout<<"\nError inverting the map: right phi: "<<right_phi<<" inv phi: "<<phi;
     */
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+   
     
   }
 }
@@ -101,6 +114,9 @@ void from_galactic_to_celestial(Double_t &ra,Double_t &dec,Double_t l,Double_t b
   Double_t lcpr=lcp*TMath::DegToRad();
   Double_t decr,rar;
   
+  Double_t old_ra=ra;
+  Double_t tmp_l=0,tmp_b=0;
+  
   Double_t br,lr,sin_t,cos_t,t;
 
   ////////////////////////////////////////////////
@@ -111,7 +127,7 @@ void from_galactic_to_celestial(Double_t &ra,Double_t &dec,Double_t l,Double_t b
   t = lcpr-lr;
   sin_t = sin(t);
   cos_t = cos(t);
-  
+
   //////////// Constants to easily invert the map
   
   Double_t c1 = sin(br);
@@ -131,22 +147,34 @@ void from_galactic_to_celestial(Double_t &ra,Double_t &dec,Double_t l,Double_t b
   ra = rar/TMath::DegToRad();
   dec = decr/TMath::DegToRad();
 
-  if(ra<180)
+  //////////////////////////////// BLACK MAGIC TO SOLVE 180 DEGREES BIAS !!!
+  
+  from_celestial_to_galactic(ra,dec,tmp_l,tmp_b);
+  if(fabs(tmp_l-l)>err_inv || fabs(tmp_b-b)>err_inv)
     ra+=180;
+  from_celestial_to_galactic(ra,dec,tmp_l,tmp_b);
+  if(fabs(tmp_l-l)>err_inv || fabs(tmp_b-b)>err_inv)
+    ra=old_ra-180;
+
+  while(ra>360)
+    ra-=360;
+
+  /////////////////////////////////////////////////////////////////////////////////////////
   
 }
 
 void from_celestial_to_local(AtPolarVect vector_out,Double_t vector_in[]) {
-  Double_t abs_s;
+  Double_t abs_s,s;
   Double_t c,norm01;
 
   norm01 = TMath::Power(vector_out.r,2)-TMath::Power(vector_out.r*sin(vector_out.lat),2);
   c=(1-TMath::Power(tan(vector_out.lon/2.),2))/(1+TMath::Power(tan(vector_out.lon/2.),2));
   abs_s = sqrt(1-TMath::Power(c,2));
+  s=((1-c)/tan(vector_out.lon/2.));
   
   if(abs_s>EPS) {
     vector_in[0]=c*sqrt(norm01);
-    vector_in[1]=abs_s*sqrt(norm01);
+    vector_in[1]=s*sqrt(norm01);
     vector_in[2]=vector_out.r*sin(vector_out.lat);
   }
   else {

@@ -1,3 +1,13 @@
+////////////////////////////// Software decsription
+//
+//
+//
+//
+//
+//
+//
+//
+///////////////////////////////////////////////////////////////////////////////////////
 
 #include "MyHead.h"
 
@@ -40,11 +50,11 @@ int main(int argc,char * argv[]) {
    */
 
   //////////////////////////////////////
-
+  
   ///////////////////////////////////////////////////////////// 
 
   Double_t perc=0;                      // -> Just used to store the percentage valu
-  string log_path = output_path_creator(0);
+  string log_path = output_path_creator(0),root_out_path = output_path_creator(1);
   TString h_name;  
   
   ofstream output_log_file(log_path);     //log file creation !
@@ -70,6 +80,19 @@ int main(int argc,char * argv[]) {
   }
 
   static TH2D* acc = (TH2D*)acc_file->Get("Acceptance");
+
+  /////////////////////////////// Writing resul map root file
+
+  TFile *out_maps = new TFile(root_out_path.c_str(),"RECREATE");
+  if(out_maps->IsZombie()) {
+    cout<<"\n\nError writing output ROOT file\n\n";
+    exit(-1);
+  }
+  
+  /////////////////////////// Create histos....
+
+  TH2D* direct_map = new TH2D("direct_map","Direct Map (infinite statistic); (#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
+  TH2D* inverse_map = new TH2D("inverse_map","Inverse Map (infinite statistic); (#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
   
   /////////////////////////////////////////////////////////////////
 
@@ -100,10 +123,17 @@ int main(int argc,char * argv[]) {
       sat_dec[i]*=TMath::DegToRad();
     }
 
-    sky_backtrack(sat_ra,sat_dec,acc);
+    sky_backtrack(sat_ra,sat_dec,acc,direct_map,inverse_map);
     
   } //end loop on seconds
 
+
+  ////////////////////////// Writing final objects
+
+  out_maps->Write();
+
+  ////////////////////////////////////////////////
+  
   cout<<"\n\nSimulation completed !!\n\n";
   output_log_file<<"\n\nSimulation completed !!\n\n";
   
