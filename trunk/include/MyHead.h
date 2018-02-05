@@ -29,10 +29,10 @@
 using namespace std;
 
 #define EPS 1.e-12
+#define err_inv 1.e-3
 
 ///////////////////////////////////// Simulation variables
 
-//const static Int_t sky_events = 1e+9;
 const static Int_t sky_events = 1e+3;
 const static UInt_t random_seed = 22;
 
@@ -64,7 +64,8 @@ extern void from_celestial_to_galactic(Double_t ra,Double_t dec,Double_t &l,Doub
 extern void from_local_to_galactic(Double_t costheta,Double_t phi,Double_t &l,Double_t &b,Float_t sat_ra[],Float_t sat_dec[],Double_t &right_ra,Double_t &right_dec,Double_t right_vector[]);
 
 // --------------------------- Function used to invert the direct map: from galactic to local !
-extern void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc);
+
+extern void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D* direct,TH2D* inverse);
 extern void invert_map(Double_t &costheta,Double_t &phi,Double_t l,Double_t b,Float_t sat_ra[],Float_t sat_dec[],Double_t &inv_ra,Double_t &inv_dec,Double_t inv_vector[]);
 extern void from_galactic_to_celestial(Double_t &ra,Double_t &dec,Double_t l,Double_t b);
 extern void from_celestial_to_local(AtPolarVect vector_out,Double_t vector_in[]);
