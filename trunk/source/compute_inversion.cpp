@@ -7,7 +7,8 @@ static Double_t acot(Double_t value) { return atan(1/value); }
 
 //////////////////////////////////////////////////////////////////////////////
 
-void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D* direct,TH2D* inverse) {
+void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D* direct,TH2D* inverse,TH1D* h_cos,TH1D* h_phi,TH1D* h_cos_LE,TH1D* h_phi_LE,Double_t &max_costheta,Double_t &min_costheta,Double_t &max_phi,Double_t &min_phi,Double_t tree_idx) {
+  
   Double_t costheta=-999,phi=-999;
   Double_t b=0,l=0;
 
@@ -16,6 +17,7 @@ void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D* direct,TH2
   Double_t right_ra,right_dec,inv_ra,inv_dec;
   Double_t right_vector[3],inv_vector[3];
   Double_t right_costheta,right_phi;
+  Double_t diff_costheta,diff_phi;
   
   //////////////////////////////////////////////
   
@@ -45,6 +47,30 @@ void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D* direct,TH2
 
     inverse->Fill(costheta,phi);
     
+    diff_costheta=right_costheta-costheta;
+    diff_phi=right_phi-phi;
+    
+    h_cos->Fill(diff_costheta);
+    h_phi->Fill(diff_phi);
+    h_cos_LE->Fill(diff_costheta);
+    h_phi_LE->Fill(diff_phi);
+    
+    if(tree_idx==0) {
+      max_costheta=min_costheta=diff_costheta;
+      max_phi=min_phi=diff_phi;
+    }
+    else {
+      if(diff_costheta>max_costheta)
+	max_costheta=diff_costheta;
+      if(diff_costheta<min_costheta)
+	min_costheta=diff_costheta;
+      if(diff_phi>max_phi)
+	max_phi=diff_phi;
+      if(diff_phi<min_phi)
+	min_phi=diff_phi;
+    }
+    
+    
     ////////////////// Check tor correct map inversion
 
     /*
@@ -69,7 +95,8 @@ void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D* direct,TH2
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    
     
-  }
+  } //end for on "sky-events"
+
 }
 
 void invert_map(Double_t &costheta,Double_t &phi,Double_t l,Double_t b,Float_t sat_ra[],Float_t sat_dec[],Double_t &inv_ra,Double_t &inv_dec,Double_t inv_vector[]) {

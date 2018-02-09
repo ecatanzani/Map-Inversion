@@ -2,7 +2,7 @@
 
 ////////////////////////// Simulation Parameters //////////////////////////
 
-Simulation timestamp: 1517851356
+Simulation timestamp: 1518178634
 Simulation TRandom3 seed: 22
 Number of readed SBI files: 3
 Number of generated events per sky portion: 1000

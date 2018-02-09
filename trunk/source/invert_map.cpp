@@ -55,7 +55,9 @@ int main(int argc,char * argv[]) {
 
   Double_t perc=0;                      // -> Just used to store the percentage valu
   string log_path = output_path_creator(0),root_out_path = output_path_creator(1);
-  TString h_name;  
+  TString h_name;
+
+  Double_t max_costheta_diff,min_costheta_diff,max_phi_diff,min_phi_diff;
   
   ofstream output_log_file(log_path);     //log file creation !
   if(!output_log_file.is_open()) {
@@ -91,8 +93,12 @@ int main(int argc,char * argv[]) {
   
   /////////////////////////// Create histos....
 
-  TH2D* direct_map = new TH2D("direct_map","Direct Map (infinite statistic); (#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
-  TH2D* inverse_map = new TH2D("inverse_map","Inverse Map (infinite statistic); (#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
+  TH2D* direct_map = new TH2D("direct_map","Direct Map (infinite statistic); #cos(#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
+  TH2D* inverse_map = new TH2D("inverse_map","Inverse Map (infinite statistic); #cos(#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
+  TH1D* h_costheta_diff = new TH1D("h_costheta_diff","Costheta difference; cos(#theta_{dir}) - cos(#theta_{inv}); Entries",1000,-2e-6,2e-6);
+  TH1D* h_phi_diff = new TH1D("h_phi_diff","Phi difference; #phi_{dir}-#phi_{inv}; Entries",1000,-0.04e-3,0.04e-3);
+  TH1D* h_costheta_diff_LE = new TH1D("h_costheta_diff_LE","Costheta difference; cos(#theta_{dir}) - cos(#theta_{inv}); Entries",1000000,-0.2,0.2);
+  TH1D* h_phi_diff_LE = new TH1D("h_phi_diff_LE","Phi difference; #phi_{dir}-#phi_{inv}; Entries",1000000,-2*TMath::Pi(),2*TMath::Pi());
   
   /////////////////////////////////////////////////////////////////
 
@@ -123,11 +129,20 @@ int main(int argc,char * argv[]) {
       sat_dec[i]*=TMath::DegToRad();
     }
 
-    sky_backtrack(sat_ra,sat_dec,acc,direct_map,inverse_map);
+    sky_backtrack(sat_ra,sat_dec,acc,direct_map,inverse_map,h_costheta_diff,h_phi_diff,h_costheta_diff_LE,h_phi_diff_LE,max_costheta_diff,min_costheta_diff,max_phi_diff,min_phi_diff,tree_idx);
     
   } //end loop on seconds
 
+  cout<<"\n\nMax costheta difference: "<<max_costheta_diff<<endl;
+  cout<<"Min costheta difference: "<<min_costheta_diff<<endl;
+  cout<<"Max phi difference: "<<max_phi_diff<<endl;
+  cout<<"Min phi difference: "<<min_phi_diff<<endl<<endl;
 
+  ////////// -------------------------------------
+
+  //h_costheta_diff->Fit("gaus");
+  //h_phi_diff->Fit("gaus");
+  
   ////////////////////////// Writing final objects
 
   out_maps->Write();
