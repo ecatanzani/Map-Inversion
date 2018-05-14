@@ -74,7 +74,7 @@ int main(int argc,char * argv[]) {
 
   /////////////////////////////// Opening DAMPE acceptance 2D-histo
   
-  static TFile* acc_file= new TFile(acceptance_final_plot.Data());
+TFile* acc_file= new TFile(acceptance_final_plot.Data());
   if(acc_file->IsZombie()) {
     cout << "\n\nError opening DAMPE acceptance TFile. Prorgram finished \n\n";
     output_log_file << "\n\nError opening DAMPE acceptance TFile. Prorgram finished \n\n";
@@ -82,7 +82,14 @@ int main(int argc,char * argv[]) {
   }
 
   static TH2D* acc = (TH2D*)acc_file->Get("Acceptance");
+    
+    /////////// Border of the satellite acceptance
+    
+    static TH2D *acc_border = (TH2D*)acc->Clone("acc_border");
+    acc_border->Reset();
+    get_acceptance_border(acc,acc_border);
 
+    
   /////////////////////////////// Writing resul map root file
 
   TFile *out_maps = new TFile(root_out_path.c_str(),"RECREATE");
@@ -91,6 +98,9 @@ int main(int argc,char * argv[]) {
     exit(-1);
   }
   
+        acc_border->Write();
+    
+    
   /////////////////////////// Create histos....
 
   TH2D* direct_map = new TH2D("direct_map","Direct Map (infinite statistic); #cos(#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
@@ -129,7 +139,7 @@ int main(int argc,char * argv[]) {
       sat_dec[i]*=TMath::DegToRad();
     }
 
-    sky_backtrack(sat_ra,sat_dec,acc,direct_map,inverse_map,h_costheta_diff,h_phi_diff,h_costheta_diff_LE,h_phi_diff_LE,max_costheta_diff,min_costheta_diff,max_phi_diff,min_phi_diff,tree_idx);
+    sky_backtrack(sat_ra,sat_dec,acc,acc_border,direct_map,inverse_map,h_costheta_diff,h_phi_diff,h_costheta_diff_LE,h_phi_diff_LE,max_costheta_diff,min_costheta_diff,max_phi_diff,min_phi_diff,tree_idx);
     
   } //end loop on seconds
 

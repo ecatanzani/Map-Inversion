@@ -23,6 +23,8 @@
 #include "TChain.h"
 #include "TColor.h"
 #include "TLine.h"
+#include "TMatrixD.h"
+#include "TAxis.h"
 
 #include "orbitStruct.h"
 
@@ -65,8 +67,11 @@ extern void from_local_to_galactic(Double_t costheta,Double_t phi,Double_t &l,Do
 
 // --------------------------- Function used to invert the direct map: from galactic to local !
 
-extern void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D* direct,TH2D* inverse,TH1D* h_cos,TH1D* h_phi,TH1D* h_cos_LE,TH1D* h_phi_LE,Double_t &max_costheta,Double_t &min_costheta,Double_t &max_phi,Double_t &min_phi,Double_t tree_idx);
+extern void sky_backtrack(Float_t sat_ra[],Float_t sat_dec[],TH2D* acc,TH2D *acc_border,TH2D* direct,TH2D* inverse,TH1D* h_cos,TH1D* h_phi,TH1D* h_cos_LE,TH1D* h_phi_LE,Double_t &max_costheta,Double_t &min_costheta,Double_t &max_phi,Double_t &min_phi,Double_t tree_idx);
 extern void invert_map(Double_t &costheta,Double_t &phi,Double_t l,Double_t b,Float_t sat_ra[],Float_t sat_dec[],Double_t &inv_ra,Double_t &inv_dec,Double_t inv_vector[]);
 extern void from_galactic_to_celestial(Double_t &ra,Double_t &dec,Double_t l,Double_t b);
 extern void from_celestial_to_local(AtPolarVect vector_out,Double_t vector_in[]);
 extern void obtain_costheta_phi(Double_t &costheta,Double_t &phi,Float_t sat_ra[],Float_t sat_dec[],Double_t vector_in[]);
+extern void obtain_costheta_phi_ROOTf(Double_t &costheta,Double_t &phi,Float_t sat_ra[],Float_t sat_dec[],Double_t vector_in[]);
+extern void get_acceptance_border(TH2D *acc,TH2D* acc_border);
+extern Bool_t outside_acceptance(Double_t costheta,Double_t phi,TH2D *acc_border);
