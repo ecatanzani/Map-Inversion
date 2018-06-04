@@ -22,6 +22,25 @@ void from_local_to_galactic(Double_t costheta,Double_t phi,Double_t &l,Double_t 
   from_celestial_to_galactic(ra,dec,l,b);
 }
 
+void R_from_local_to_galactic(Double_t costheta,Double_t phi,Double_t &l,Double_t &b,Float_t sat_ra[],Float_t sat_dec[]) {
+    
+    Double_t ra=-999, dec=-999;
+    AtVect vector_in;
+    AtPolarVect vector_out, vector_out_inv;
+    
+    vector_in[0]=sin(acos(costheta))*cos(phi);
+    vector_in[1]=sin(acos(costheta))*sin(phi);
+    vector_in[2]=costheta;
+    R_from_satellite_to_celestial(sat_ra,sat_dec,vector_in,vector_out);
+    invert_AtPolarVect_direction(vector_out,vector_out_inv);
+    ra=vector_out_inv.lon;
+    dec=vector_out_inv.lat;
+    ra=ra*TMath::RadToDeg();
+    dec=dec*TMath::RadToDeg();
+    from_celestial_to_galactic(ra,dec,l,b);
+    
+}
+
 void from_satellite_to_celestial(Float_t ra[],Float_t dec[],double vectorin[],AtPolarVect &vector_out,Double_t right_vector[]) {
   Float_t ux1[3];
   Float_t uy1[3];
@@ -55,6 +74,40 @@ void from_satellite_to_celestial(Float_t ra[],Float_t dec[],double vectorin[],At
   AtVect_To_AtPolarVect(tmp_vector_out,vector_out);
 
 }
+
+void R_from_satellite_to_celestial(Float_t ra[],Float_t dec[],double vectorin[],AtPolarVect &vector_out) {
+    
+    Float_t ux1[3];
+    Float_t uy1[3];
+    Float_t uz1[3];
+    Float_t rax = ra[0];
+    Float_t ray = ra[1];
+    Float_t raz = ra[2];
+    Float_t decx = dec[0];
+    Float_t decy = dec[1];
+    Float_t decz = dec[2];
+    
+    AtVect tmp_vector_out;
+    
+    ux1[0] = cos(decx)*cos(rax);
+    ux1[1] = cos(decx)*sin(rax);
+    ux1[2] = sin(decx);
+    
+    uy1[0] = cos(decy)*cos(ray);
+    uy1[1] = cos(decy)*sin(ray);
+    uy1[2] = sin(decy);
+    
+    uz1[0] = cos(decz)*cos(raz);
+    uz1[1] = cos(decz)*sin(raz);
+    uz1[2] = sin(decz);
+    
+    for (Int_t idx=0; idx<3; idx++)
+        tmp_vector_out[idx] = vectorin[0] * ux1[idx] + vectorin[1] * uy1[idx] + vectorin[2] * uz1[idx];
+        
+    AtVect_To_AtPolarVect(tmp_vector_out,vector_out);
+    
+}
+
 
 void AtVect_To_AtPolarVect(double in_vector[],AtPolarVect &vector_out) {
   double  norm01, c, s;
