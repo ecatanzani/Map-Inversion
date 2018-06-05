@@ -39,9 +39,12 @@ void sky_backtrack_rndm(Float_t sat_ra[],Float_t sat_dec[],TH2D *evDist_border,T
             choosen_b=r_gen.Uniform(min_b,max_b);
         }
         R_invert_map(costheta,phi,choosen_l,choosen_b,sat_ra,sat_dec);
+        /*
+        std::cout<<"\n\nCOS: "<<costheta<<"\nPHi: "<<phi<<std::endl;
         if(outside_evDist(costheta,phi,evDist_border)==true)
             idx_ev--;
         else
+         */
             inverse.Fill(costheta,phi);
     }
 }
@@ -717,7 +720,7 @@ void obtain_costheta_phi_ROOTf(Double_t &costheta,Double_t &phi,Float_t sat_ra[]
     }
 }
 
-void get_acceptance_border(TH2D *histo,TH2D* histo_border) {
+void get_evDist_border(TH2D *histo,TH2D* histo_border) {
     
     for(Int_t y_bin=1; y_bin<=histo->GetNbinsY(); y_bin++)
         for(Int_t x_bin=1; x_bin<=histo->GetNbinsX(); x_bin++)
@@ -737,12 +740,14 @@ Bool_t outside_evDist(Double_t costheta,Double_t phi,TH2D* evDist_border) {
     Ybin=Yaxis->FindBin(phi);
     lXbin=.5/Xaxis->GetNbins();
     
-    for(Int_t x_bin=1; x_bin<=evDist_border->GetNbinsX(); x_bin++)
+    for(Int_t x_bin=1; x_bin<=evDist_border->GetNbinsX(); x_bin++) {
         if(evDist_border->GetBinContent(x_bin,Ybin)!=0) {
-            //evDist_costheta=x_bin*(.5/Xaxis->GetNbins());
-            evDist_costheta = .5*((x_bin+1)*lXbin-x_bin*lXbin);
+            //evDist_costheta=.5+x_bin*(.5/Xaxis->GetNbins());
+            evDist_costheta = .5 + .5*((x_bin+1)*lXbin+x_bin*lXbin);
             break;
         }
+    }
+    
     if(evDist_costheta>costheta)
         outside=true;
     else

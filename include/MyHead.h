@@ -85,6 +85,5 @@ extern void from_galactic_to_celestial(Double_t &ra,Double_t &dec,Double_t l,Dou
 extern void from_celestial_to_local(AtPolarVect vector_out,Double_t vector_in[]);
 extern void obtain_costheta_phi(Double_t &costheta,Double_t &phi,Float_t sat_ra[],Float_t sat_dec[],Double_t vector_in[]);
 extern void obtain_costheta_phi_ROOTf(Double_t &costheta,Double_t &phi,Float_t sat_ra[],Float_t sat_dec[],Double_t vector_in[]);
-extern void get_acceptance_border(TH2D *histo,TH2D* histo_border);
-extern Bool_t outside_acceptance(Double_t costheta,Double_t phi,TH2D *evDist_border);
+extern void get_evDist_border(TH2D *histo,TH2D* histo_border);
 

@@ -94,7 +94,7 @@ int main(int argc,char * argv[]) {
     
     static TH2D* evDist_border = (TH2D*)evDist->Clone("evDist_border");
     evDist_border->Reset();
-    get_acceptance_border(evDist,evDist_border);
+    get_evDist_border(evDist,evDist_border);
 
     /////////////////////////////// Writing resul map root file
 
@@ -110,7 +110,7 @@ int main(int argc,char * argv[]) {
 
     TH2D direct_map("direct_map","Direct Map (infinite statistic); #cos(#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
     TH2D inverse_map("inverse_map","Inverse Map (infinite statistic); #cos(#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
-    TH2D R_inverse_map("inverse_map","Inverse Map (infinite statistic); #cos(#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
+    TH2D R_inverse_map("R_inverse_map","Inverse Map (infinite statistic); #cos(#theta);  #phi; Entries",1000,0,1,1000,0,2*TMath::Pi());
     TH1D h_costheta_diff("h_costheta_diff","Costheta difference; cos(#theta_{dir}) - cos(#theta_{inv}); Entries",1000,-2e-6,2e-6);
     TH1D h_phi_diff("h_phi_diff","Phi difference; #phi_{dir}-#phi_{inv}; Entries",1000,-0.04e-3,0.04e-3);
     TH1D h_costheta_diff_LE("h_costheta_diff_LE","Costheta difference; cos(#theta_{dir}) - cos(#theta_{inv}); Entries",1000000,-0.2,0.2);
